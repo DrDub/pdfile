@@ -12,7 +12,7 @@ This library does not require PD.
 LICENSE
 -------
 
-Copyright 2011 Pablo Duboue
+Copyright 2011-2012 Pablo Duboue
 <pablo.duboue@gmail.com>
 http://duboue.net
 
@@ -32,10 +32,10 @@ along with PdFile.  If not, see <http://www.gnu.org/licenses/>.
 EXAMPLES
 --------
 
-Some examples are shipped with the pdfile Python package. To try them, 
+Some examples are shipped with the pdfile Python module. To try them, 
 run the examples scripts located in pdfile/examples:
 
-  python pdfile/examples/monto_escrito.py
+  python examples/monto_escrito.py
 
 SEE ALSO
 --------

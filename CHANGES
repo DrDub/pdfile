@@ -2,6 +2,12 @@ pdfile changes log
 ------------------
 Changes are listed from most recent to oldest.
 
+0.2 (March 05th 2012)
+-----------------------
+ * Bug fixing (PdMsg and \n issues).
+ * Added modify_globals option to automatically create variables in module
+ * Added set_next_pos to Patch
+
 0.1 (October 10th 2011)
 -----------------------
  * Initial version.

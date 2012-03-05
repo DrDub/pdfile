@@ -3,7 +3,7 @@
 #
 # The PdFile library for Pure Data static patching.
 #
-# Copyright 2011 Pablo Duboue
+# Copyright 2011-2012 Pablo Duboue
 # <pablo.duboue@gmail.com>
 # http://duboue.net
 #
@@ -20,4 +20,4 @@
 # You should have received a copy of the gnu general public license
 # along with PdFile.  If not, see <http://www.gnu.org/licenses/>.
 __all__ = ["pdfile"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

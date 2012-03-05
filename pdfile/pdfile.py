@@ -3,7 +3,7 @@
 #
 # The PdFile library for Pure Data static patching.
 #
-# Copyright 2011 Pablo Duboue
+# Copyright 2011-2012 Pablo Duboue
 # <pablo.duboue@gmail.com>
 # http://duboue.net
 #
@@ -31,6 +31,8 @@ class PdFile(object):
     """
     A Pure Data File.
     """
+
+    modify_globals = False
 
     def __init__(self, filename, pos=None, size=None, font_size=10):
         pos = pos or [0, 0]
@@ -80,9 +82,9 @@ class Chunk(object):
 
     def write_end(self, file_):
         """
-        Write end of the chunk, ;\r\n
+        Write end of the chunk, ;\n or ;\r\n depending on the platform
         """
-        file_.write(';\r\n')
+        file_.write(";\n")
 
 
     def write(self, file_):
@@ -148,7 +150,7 @@ class Patch(ChunkWithPos):
             """
             Manage a new element.
             """
-            if isinstance(element, PdObject):
+            if  'count' in element.__dict__:
                 element.count = self.object_count
                 self.object_count += 1
             if not name is None:
@@ -171,6 +173,10 @@ class Patch(ChunkWithPos):
                 obj2 = self.elem_by_name[obj2]
             self.connections.append(Connection(obj1, outlet, obj2, inlet))
 
+        def set_next_pos(self, pos):
+            self.last_pos[0] = pos[0] - self.delta[0]
+            self.last_pos[1] = pos[1] - self.delta[1]
+
 
     def __init__(self, pos=None, size=None, name=None, shown=False,
                  main=False, font_size=10, parent_pos=None):
@@ -190,12 +196,16 @@ class Patch(ChunkWithPos):
         self.main = main
         self.font_size = font_size
         self.mgr = Patch.Mgr()
+        self.count = 0
         
     def add(self, element, name=None):
         """
         Add an element to a patch.
         """
-        return self.mgr.add(element, name)
+        added = self.mgr.add(element, name)
+        if PdFile.modify_globals and not name is None:
+            globals()[name] = added
+        return added
 
     def connect(self, obj1, outlet, obj2, inlet):
         """
@@ -213,6 +223,17 @@ class Patch(ChunkWithPos):
         if 'y' in kwargs:
             delta[1] = kwargs['y']
         self.mgr.delta = delta
+
+    def set_next_pos(self,**kwargs):
+        pos = kwargs.get('pos',self.mgr.last_pos)
+        pos[0] += self.mgr.delta[0]
+        pos[1] += self.mgr.delta[1]
+        if 'x' in kwargs:
+            pos[0] = kwargs['x']
+        if 'y' in kwargs:
+            pos[1] = kwargs['y']
+        self.mgr.set_next_pos(pos)
+        
 
     def write(self, file_):
         """
@@ -236,8 +257,7 @@ class Patch(ChunkWithPos):
         for conn in self.mgr.connections:
             conn.write(file_)
         if not self.main:
-            self.write_beginning(file_)
-            file_.write(' restore %d %d pd %s' %
+            file_.write('#X restore %d %d pd %s' %
               (self.pos[0], self.pos[1], self.name))
             self.write_end(file_)
 
@@ -263,6 +283,7 @@ class PdMsg(ChunkWithPos):
 
     def __init__(self, *args, **kwargs):
         super(PdMsg, self).__init__('X', *args, **kwargs)
+        self.count = 0
 
     def linearize(self):
         return ['msg', self.pos[0], self.pos[1]] + self.remaining
